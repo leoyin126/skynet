@@ -116,6 +116,7 @@ static const char * load_config = "\
 
 int
 main(int argc, char *argv[]) {
+	// 启动必须携带 config 配置目录，否则报错
 	const char * config_file = NULL ;
 	if (argc > 1) {
 		config_file = argv[1];
@@ -125,33 +126,45 @@ main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	// 初始化Server节点G_NODE和启动节点的主线程
 	skynet_globalinit();
+	// 初始化skynet_env，每个skynet_env 有一个螺旋锁保户的lua_state
 	skynet_env_init();
 
+	// 调用 linux 的sigaction
 	sigign();
 
 	struct skynet_config config;
 
 #ifdef LUA_CACHELIB
+	// 锁lua_state
 	// init the lock of code cache
 	luaL_initcodecache();
 #endif
 
 	struct lua_State *L = luaL_newstate();
+	// 通过 L 来 require 各种 lualibs
 	luaL_openlibs(L);	// link lua lib
 
+	// 在 L 在执行 load_config
 	int err =  luaL_loadbufferx(L, load_config, strlen(load_config), "=[skynet config]", "t");
 	assert(err == LUA_OK);
+	
+	// 把 config_file放进 L
 	lua_pushstring(L, config_file);
 
+	// pcall 上面的string
 	err = lua_pcall(L, 1, 1, 0);
 	if (err) {
 		fprintf(stderr,"%s\n",lua_tostring(L,-1));
 		lua_close(L);
 		return 1;
 	}
+
+	// 执行 config_file pcall 后的一些初始化
 	_init_env(L);
 
+	// 设置配置
 	config.thread =  optint("thread",8);
 	config.module_path = optstring("cpath","./cservice/?.so");
 	config.harbor = optint("harbor", 1);
@@ -163,7 +176,10 @@ main(int argc, char *argv[]) {
 
 	lua_close(L);
 
+	// Skynet 开始启动，并进入循环
 	skynet_start(&config);
+
+	// Skynet 退出进程
 	skynet_globalexit();
 
 	return 0;
