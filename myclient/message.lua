@@ -13,7 +13,7 @@ function message:register(name)
 	local f = assert(io.open(name .. ".c2s.sproto"))
 	local t = f:read "a"
 	f:close()
-	self.request = self.host:attach(sproto.parse(t))
+	self.protoReq = self.host:attach(sproto.parse(t))
 end
 
 function message:peer(addr, port)
@@ -27,13 +27,17 @@ function message:connect()
 end
 
 function message:bind(obj, handler)
+	self.object = self.object or {}
 	self.object[obj] = handler
 end
 
 function message:request(name, args)
+	self.session = self.session or {}
+	self.session_id = self.session_id or 1
 	self.session_id = self.session_id + 1
 	self.session[self.session_id] = { name = name, req = args }
-	socket:write(self.request(name , args, self.session_id))
+	print(string.format( "message.request session_id=%d, name=%s, req=%s",self.session_id, name, serialize(args) ))
+	socket:write(self.protoReq(name , args, self.session_id))
 	return self.session_id
 end
 
