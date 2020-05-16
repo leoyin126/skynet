@@ -40,7 +40,7 @@ function socket:close()
 	self.message = nil
 end
 
-function socket.read(ti)
+function socket:read(ti)
 	while true do
 		local ok, msg, n = pcall(string.unpack, ">s2", self.message)
 		if not ok then
