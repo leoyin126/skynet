@@ -50,34 +50,35 @@ function message:update(ti)
 	if t == "REQUEST" then
 		for obj, handler in pairs(self.object) do
 			local f = handler[session_id]	-- session_id is request type
-			if f then
-				local ok, err_msg = pcall(f, obj, resp)	-- resp is content of push
-				if not ok then
-					print(string.format("push %s for [%s] error : %s", session_id, tostring(obj), err_msg))
-				end
+			if f == nil then return false end
+
+			local ok, err_msg = pcall(f, obj, resp)	-- resp is content of push
+			if not ok then
+				print(string.format("push %s for [%s] error : %s", session_id, tostring(obj), err_msg))
 			end
 		end
-	else
-		local session = self.session[session_id]
-		self.session[session_id] = nil
+		return true
+	end
 
-		for obj, handler in pairs(self.object) do
-			if err then
-				local f = handler.__error
-				if f then
-					local ok, err_msg = pcall(f, obj, session.name, err, session.req, session_id)
-					if not ok then
-						print(string.format("session %s[%d] error(%s) for [%s] error : %s", session.name, session_id, err, tostring(obj), err_msg))
-					end
-				end
-			else
-				local f = handler[session.name]
-				if f then
-					local ok, err_msg = pcall(f, obj, session.req, resp, session_id)
-					if not ok then
-						print(string.format("session %s[%d] for [%s] error : %s", session.name, session_id, tostring(obj), err_msg))
-					end
-				end
+	-- t == other
+	local session = self.session[session_id]
+	self.session[session_id] = nil
+
+	for obj, handler in pairs(self.object) do
+		if err then
+			local f = handler.__error
+			if f == nil then return false end
+			
+			local ok, err_msg = pcall(f, obj, session.name, err, session.req, session_id)
+			if not ok then
+				print(string.format("session %s[%d] error(%s) for [%s] error : %s", session.name, session_id, err, tostring(obj), err_msg))
+			end
+		else
+			local f = handler[session.name]
+			if f == nil then return false end
+			local ok, err_msg = pcall(f, obj, session.req, resp, session_id)
+			if not ok then
+				print(string.format("session %s[%d] for [%s] error : %s", session.name, session_id, tostring(obj), err_msg))
 			end
 		end
 	end
