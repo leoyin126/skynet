@@ -1,11 +1,11 @@
 local Para = ...
 
+IP = "127.0.0.1"
+-- 需要连接watchdog 的ip port
+port = 8888
 if Para ~= nil then
 	IP = Para[1] or "127.0.0.1"
-	port = Para[2] or 2013
-else
-	IP = "127.0.0.1"
-	port = 2013
+	port = Para[2] or 8888
 end
 
 package.cpath = string.format("luaclib/?.so;lsocket/?.so")
@@ -16,7 +16,7 @@ local message = require "message"
 
 message:register("myproto/proto")
 
-message:peer(IP, 2013)
+message:peer(IP, port)
 message:connect()
 
 local event = {}

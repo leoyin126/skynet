@@ -49,6 +49,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
+		print(string.format( "watchdog session=%s,source=%s,cmd=%s,subcmd=%s",session, source, cmd, subcmd ))
 		if cmd == "socket" then
 			local f = SOCKET[subcmd]
 			f(...)
