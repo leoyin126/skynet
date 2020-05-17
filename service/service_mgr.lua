@@ -197,6 +197,8 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, command, ...)
+		print(string.format("session=%d, address=%s, command = %s", session, address, command))
+		
 		local f = cmd[command]
 		if f == nil then
 			skynet.ret(skynet.pack(nil, "Invalid command " .. command))
