@@ -1,34 +1,31 @@
+package.path = "./myserver/?.lua;" .. package.path
+
 local skynet = require "skynet"
 local sprotoparser = require "sprotoparser"
 local sprotoloader = require "sprotoloader"
-local service = require "service"
-local log = require "log"
-
-local loader = {}
-local data = {}
+require "function"
 
 local function load(name)
-	local filename = string.format("proto/%s.sproto", name)
+	local filename = string.format("myproto/%s.sproto", name)
 	local f = assert(io.open(filename), "Can't open " .. name)
 	local t = f:read "a"
 	f:close()
 	return sprotoparser.parse(t)
 end
 
-function loader.load(list)
-	for i, name in ipairs(list) do
-		local p = load(name)
-		log("load proto [%s] in slot %d", name, i)
-		data[name] = i
-		sprotoloader.save(p, i)
-	end
-end
-
-function loader.index(name)
-	return data[name]
-end
-
-service.init {
-	command = loader,
-	info = data
-}
+skynet.start(function()
+	proto = proto or {}
+	proto.c2s = load("proto.c2s")
+	proto.s2c = load("proto.s2c")
+	print_r(proto.c2s)
+	print_r(proto.s2c)
+	sprotoloader.save(proto.c2s, 1)
+	sprotoloader.save(proto.s2c, 2)
+	--[[
+	skynet.call(proto, "lua", "load", {
+		"proto.c2s",
+		"proto.s2c",
+	})
+	]]
+	-- don't call skynet.exit() , because sproto.core may unload and the global slot become invalid
+end)
