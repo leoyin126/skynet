@@ -1,6 +1,12 @@
-local IP = ...
+local Para = ...
 
-IP = IP or "127.0.0.1"
+if Para ~= nil then
+	IP = Para[1] or "127.0.0.1"
+	port = Para[2] or 2013
+else
+	IP = "127.0.0.1"
+	port = 2013
+end
 
 package.cpath = string.format("luaclib/?.so;lsocket/?.so")
 package.path = "lualib/?.lua;myclient/?.lua"
@@ -10,7 +16,7 @@ local message = require "message"
 
 message:register("myproto/proto")
 
-message:peer(IP, 8000)
+message:peer(IP, 2013)
 message:connect()
 
 local event = {}
