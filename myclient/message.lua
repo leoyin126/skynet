@@ -33,7 +33,7 @@ end
 
 function message:request(name, args)
 	self.session = self.session or {}
-	self.session_id = self.session_id or 1
+	self.session_id = self.session_id or 0
 	self.session_id = self.session_id + 1
 	self.session[self.session_id] = { name = name, req = args }
 	print(string.format( "message.request session_id=%d, name=%s, req=%s",self.session_id, name, serialize(args) ))
