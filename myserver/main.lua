@@ -12,7 +12,7 @@ skynet.start(function()
 
 	skynet.newservice("debug_console",8000)
 	
-
+	
 	local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,
@@ -20,8 +20,6 @@ skynet.start(function()
 		nodelay = true,
 	})
 	skynet.error("Watchdog listen on", 8888)
-	
-	--local hub = skynet.uniqueservice "hub"
-	--skynet.call(hub, "lua", "open", "0.0.0.0", 5678)
+
 	skynet.exit()
 end)
