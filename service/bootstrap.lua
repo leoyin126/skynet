@@ -24,6 +24,7 @@ skynet.start(function()
 
 	else
 		if standalone then
+			-- cmaster 是主服务
 			if not pcall(skynet.newservice,"cmaster") then
 				skynet.abort()
 			end
