@@ -110,13 +110,17 @@ end
 skynet.start(function()
 	local master_addr = skynet.getenv "standalone"
 	skynet.error("master listen socket " .. tostring(master_addr))
+	-- 开始接听master_addr
 	local fd = socket.listen(master_addr)
+	-- socket.start 会创建 connet，并在回调函数回传一下个connet的句柄id及addr(ip可能不变，但port一定变了)
+	-- print("fd="..fd)
 	socket.start(fd , function(id, addr)
 		skynet.error("connect from " .. addr .. " " .. id)
+		-- 用新的 socket 句柄start connet 用于 handshake slave 
 		socket.start(id)
-		local ok, slave, slave_addr = pcall(handshake, id)
+		local ok, slaveid, slave_addr = pcall(handshake, id)
 		if ok then
-			skynet.fork(monitor_slave, slave, slave_addr)
+			skynet.fork(monitor_slave, slaveid, slave_addr)
 		else
 			skynet.error(string.format("disconnect fd = %d, error = %s", id, slave))
 			socket.close(id)

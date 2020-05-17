@@ -86,6 +86,14 @@ skynet.send(".cslave", "lua", "REGISTER", name, handle)
 这里没非funciton函数，只是返回一个 manager 的table，里面注册几个skynet对service的管理函数。
 
 4. 进入 skynet.start() 的函数
+这里主要 
+```lua
+pcall(skynet.newservice,"cmaster")
+pcall(skynet.newservice,"cslave")
+--最后
+skynet.newservice "service_mgr"
+-- pcall 和下面的 newservice 一样的，只是pcall可以用于lua的异常处理用
+````
 
-
-5. 
+### 执行cmaster.lua
+1. 
