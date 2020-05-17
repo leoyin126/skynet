@@ -344,10 +344,12 @@ function skynet.exit()
 	coroutine_yield "QUIT"
 end
 
+-- 获取 c 中设置的环境变量
 function skynet.getenv(key)
 	return (c.command("GETENV",key))
 end
 
+-- 设置 c 中设置的环境变量
 function skynet.setenv(key, value)
 	assert(c.command("GETENV",key) == nil, "Can't setenv exist key : " .. key)
 	c.command("SETENV",key .. " " ..value)
@@ -501,10 +503,12 @@ function skynet.response(pack)
 	return response
 end
 
+-- 返回参数的 pack
 function skynet.retpack(...)
 	return skynet.ret(skynet.pack(...))
 end
 
+-- co 的wakeup列表？
 function skynet.wakeup(token)
 	if sleep_session[token] then
 		tinsert(wakeup_queue, token)
@@ -545,6 +549,7 @@ function skynet.dispatch_unknown_response(unknown)
 	return prev
 end
 
+-- 用于创建 co 的 fork 函数
 function skynet.fork(func,...)
 	local n = select("#", ...)
 	local co
@@ -622,8 +627,11 @@ local function raw_dispatch_message(prototype, msg, sz, session, source)
 	end
 end
 
+-- c 调用的 dispatch 函数
 function skynet.dispatch_message(...)
+	-- pcall 整个 raw dispatch
 	local succ, err = pcall(raw_dispatch_message,...)
+	-- 并且吧所有的 fork 出来的 co 队列创建 coroutine 并运行 
 	while true do
 		local co = tremove(fork_queue,1)
 		if co == nil then
@@ -642,10 +650,12 @@ function skynet.dispatch_message(...)
 	assert(succ, tostring(err))
 end
 
+-- 注册新服务
 function skynet.newservice(name, ...)
 	return skynet.call(".launcher", "lua" , "LAUNCH", "snlua", name, ...)
 end
 
+-- 注册唯一服务
 function skynet.uniqueservice(global, ...)
 	if global == true then
 		return assert(skynet.call(".service", "lua", "GLAUNCH", ...))
@@ -654,6 +664,7 @@ function skynet.uniqueservice(global, ...)
 	end
 end
 
+-- 获取service
 function skynet.queryservice(global, ...)
 	if global == true then
 		return assert(skynet.call(".service", "lua", "GQUERY", ...))
@@ -761,8 +772,11 @@ function skynet.init_service(start)
 	end
 end
 
+-- skynet的主入口
 function skynet.start(start_func)
+	-- 在c（c进程）中注册整个 skynet 的 dispatch 函数
 	c.callback(skynet.dispatch_message)
+	-- init_thread 是个upvalue, function结束后，会置空
 	init_thread = skynet.timeout(0, function()
 		skynet.init_service(start_func)
 		init_thread = nil
