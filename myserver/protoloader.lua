@@ -10,7 +10,7 @@ local function load(name)
 	local f = assert(io.open(filename), "Can't open " .. name)
 	local t = f:read "a"
 	f:close()
-	print(t)
+	--print(t)
 	return sprotoparser.parse(t)
 end
 
