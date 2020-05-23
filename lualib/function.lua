@@ -27,7 +27,7 @@ function serialize(obj)
     return lua  
 end
 
-function print_r ( t )  
+function print_r ( name, t )  
     local print_r_cache={}
     local function sub_print_r(t,indent)
         if (print_r_cache[tostring(t)]) then
