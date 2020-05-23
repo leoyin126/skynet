@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+require "function"
 
 local CMD = {}
 local SOCKET = {}
@@ -6,7 +7,7 @@ local gate
 local agent = {}
 
 function SOCKET.open(fd, addr)
-	skynet.error("New client from : " .. addr)
+	skynet.error(string.format( "[watchdog]New client fd=%d from : %s", fd, addr))
 	agent[fd] = skynet.newservice("agent")
 	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
 end
@@ -49,11 +50,16 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
-		print(string.format( "watchdog session=%s,source=%s,cmd=%s,subcmd=%s",session, source, cmd, subcmd ))
+		print(string.format( "[watchdog] session=%s,source=%s,cmd=%s, subcmd=",session, source, cmd ))
+		print_r(subcmd)
+
 		if cmd == "socket" then
 			local f = SOCKET[subcmd]
 			f(...)
 			-- socket api don't need return
+		elseif cmd == "CMD" then
+			local f = assert(CMD[cmd])
+			skynet.ret(skynet.pack(f(subcmd, ...)))
 		else
 			local f = assert(CMD[cmd])
 			skynet.ret(skynet.pack(f(subcmd, ...)))
