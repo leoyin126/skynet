@@ -76,14 +76,14 @@ function CMD.start(watchdogpara)
 	local gate = watchdogpara.gate
 	WATCHDOG = watchdogpara.watchdog
 
-	print("[agent]CMD.star cfd="..cfd)
-	print("[agent]CMD.star gate="..gate)
-	print("[agent]CMD.star WATCHDOG="..WATCHDOG)
+	--print("[agent]CMD.star cfd="..cfd)
+	--print("[agent]CMD.star gate="..gate)
+	--print("[agent]CMD.star WATCHDOG="..WATCHDOG)
 	-- slot 1,2 set at main.lua
 	host = sprotoloader.load(1):host "package"
 	send_request = host:attach(sprotoloader.load(2))
-	print("[agent]CMD.star send_request=")
-	print_r(send_request)
+	--print("[agent]CMD.star send_request=")
+	--print_r(send_request)
 	skynet.fork(function()
 		while true do
 			send_package(send_request("heartbeat"))
